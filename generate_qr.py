@@ -2,7 +2,7 @@ import qrcode
 
 # Uygulamanı canlıya aldığında (Render/Vercel vb.) buraya gerçek URL'i yazmalısın.
 # Lokal test için kendi ağındaki IP adresini yazabilirsin (Örn: http://192.168.1.X:5000)
-BASE_URL = "https://127.0.0.1:5000"
+BASE_URL = "https://dogum-gunu-paradoksu.onrender.com/"
 
 def create_qr():
     qr = qrcode.QRCode(
