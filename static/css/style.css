@@ -1,0 +1,290 @@
+:root {
+    /* Afişin krem/beyaz arka plan tonu */
+    --bg-color: #fcfbf9;
+    --text-color: #333333;
+    --card-bg: #ffffff;
+    --primary: #d63230; /* Afişteki o vurucu kırmızı */
+    --secondary: #457b9d;
+    --shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+    --border-radius: 16px;
+    --transition: all 0.3s ease;
+
+    /* Kartlar için Afiş Renkleri (Pastel Tonlar) */
+    --form-bg: #e3f2fd;       /* Açık Mavi */
+    --form-border: #90caf9;
+    
+    --matches-bg: #fff3e0;    /* Açık Turuncu/Sarı */
+    --matches-border: #ffcc80;
+    
+    --chart-bg: #ffebee;      /* Açık Kırmızı/Pembe */
+    --chart-border: #ef9a9a;
+    
+    --math-bg: #f3e5f5;       /* Açık Mor */
+    --math-border: #ce93d8;
+    
+    --cyber-bg: #e8f5e9;      /* Açık Yeşil */
+    --cyber-border: #a5d6a7;
+}
+
+/* Karanlık Mod (Afiş teması aydınlık ağırlıklı olsa da, karanlık modu bozmamak için) */
+body.dark-mode {
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --card-bg: #1e1e1e;
+    --primary: #ff4d6d;
+    --secondary: #8ecae6;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    /* Karanlık modda pastel kutular çok sırıtmaması için biraz koyulaştırıyoruz */
+    --form-bg: #1a2a3a; --form-border: #2c3e50;
+    --matches-bg: #332211; --matches-border: #553311;
+    --chart-bg: #331111; --chart-border: #551111;
+    --math-bg: #2a1a3a; --math-border: #3e2c50;
+    --cyber-bg: #1a3a2a; --cyber-border: #2c503e;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: var(--transition);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: var(--card-bg);
+    box-shadow: var(--shadow);
+    border-bottom: 3px solid var(--primary); /* Afişteki kırmızı şerit detayı */
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.theme-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.theme-btn:hover { color: var(--primary); }
+
+/* Hero Section (Afişin Tepe Başlığı Gibi) */
+.hero {
+    text-align: center;
+    margin: 3rem 0;
+}
+
+.hero h1 {
+    font-size: 3.2rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    color: var(--primary);
+    text-transform: uppercase;
+    text-shadow: 3px 3px 0px rgba(214, 50, 48, 0.2); /* Posterlerdeki kalın font hissi */
+    letter-spacing: 1px;
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    color: var(--text-color);
+    font-weight: 600;
+    background-color: var(--primary);
+    color: white;
+    display: inline-block;
+    padding: 8px 20px;
+    border-radius: 25px; /* Afişteki kırmızı baloncuğa benzetmek için */
+    margin: 0 auto;
+}
+
+/* Layout */
+.grid-layout {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.theory-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+/* Genel Kart Tasarımı */
+.card {
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    border: 3px solid; /* Afişteki gibi kalın hatlar */
+    transition: var(--transition);
+}
+
+.card:hover { transform: translateY(-3px); }
+
+.card h2 { 
+    font-size: 1.3rem; 
+    margin-bottom: 1.5rem; 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    border-bottom: 2px dashed; /* Afişteki kesik çizgi detayı */
+    padding-bottom: 10px;
+}
+
+/* Kartların Afişe Özel Renklendirmeleri */
+.form-card { background-color: var(--form-bg); border-color: var(--form-border); }
+.form-card h2 { color: #1565c0; border-bottom-color: #90caf9; }
+
+.matches-card { background-color: var(--matches-bg); border-color: var(--matches-border); }
+.matches-card h2 { color: #e65100; border-bottom-color: #ffcc80; }
+
+.chart-card { background-color: var(--chart-bg); border-color: var(--chart-border); }
+.chart-card h2 { color: #c62828; border-bottom-color: #ef9a9a; }
+
+.math-card { background-color: var(--math-bg); border-color: var(--math-border); }
+.math-card h2 { color: #8e24aa; border-bottom-color: #ce93d8; }
+
+.cyber-card { background-color: var(--cyber-bg); border-color: var(--cyber-border); }
+.cyber-card h2 { color: #2e7d32; border-bottom-color: #a5d6a7; }
+
+
+/* Form */
+.input-group { margin-bottom: 1.5rem; }
+.input-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem; color: #1565c0; }
+.input-group input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid var(--form-border);
+    border-radius: 8px;
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    outline: none;
+    font-weight: 600;
+    transition: var(--transition);
+}
+.input-group input:focus { border-color: #1565c0; }
+
+.submit-btn {
+    width: 100%;
+    padding: 14px;
+    background-color: #1565c0;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+}
+.submit-btn:hover { background-color: #0d47a1; transform: scale(1.02); }
+
+/* Stats Grid (Afişteki küçük kutucuklar gibi) */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-box {
+    background-color: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    text-align: center;
+    border: 2px dashed #cfd8dc;
+}
+
+.stat-box.highlight { border: 3px solid var(--primary); background-color: #fff9f9;}
+.stat-icon { font-size: 2rem; color: var(--secondary); margin-bottom: 10px; }
+.stat-box h3 { font-size: 0.9rem; color: #546e7a; margin-bottom: 5px; font-weight: 700;}
+.stat-value { font-size: 2rem; font-weight: 800; color: var(--primary); }
+
+/* Matches List */
+.matches-container { max-height: 300px; overflow-y: auto; padding-right: 5px;}
+.match-item {
+    background-color: var(--card-bg);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border-left: 5px solid #e65100;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.match-date { font-weight: 800; color: #e65100; margin-bottom: 5px; }
+.match-names { font-size: 0.9rem; font-weight: 600; color: var(--text-color); }
+.match-count { float: right; background-color: #e65100; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;}
+
+/* Theory Sections */
+.formula-box { 
+    background-color: var(--card-bg); 
+    padding: 15px; 
+    border-radius: 8px; 
+    text-align: center; 
+    margin: 15px 0; 
+    font-size: 1.2rem; 
+    border: 2px dashed var(--math-border);
+    overflow-x: auto;
+}
+.theory-card ul { margin-left: 20px; margin-top: 15px; line-height: 1.8; font-weight: 500;}
+.theory-card p { font-weight: 500; line-height: 1.6;}
+
+/* Toast */
+.toast {
+    visibility: hidden;
+    min-width: 250px;
+    background-color: var(--text-color);
+    color: var(--bg-color);
+    text-align: center;
+    border-radius: 8px;
+    font-weight: 600;
+    padding: 16px;
+    position: fixed;
+    z-index: 1000;
+    left: 50%;
+    bottom: 30px;
+    transform: translateX(-50%);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.toast.show {
+    visibility: visible;
+    animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+@keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+@keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+
+/* Footer */
+footer { text-align: center; padding: 2rem; color: #6c757d; font-weight: 600; font-size: 0.9rem; border-top: 2px dashed #cfd8dc; margin-top: 2rem;}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .grid-layout, .theory-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 500px) {
+    .stats-grid { grid-template-columns: 1fr; }
+}

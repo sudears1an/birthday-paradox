@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doğum Günü Paradoksu - Canlı Deney</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="light-mode">
+    
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.replace('light-mode', 'dark-mode');
+        }
+    </script>
+
+    <div id="toast" class="toast">Mesaj</div>
+
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fa-solid fa-cake-candles"></i>
+            <span>ParadoxLive</span>
+        </div>
+        <button id="theme-toggle" class="theme-btn">
+            <i class="fa-solid fa-moon"></i>
+        </button>
+    </nav>
+
+    <main class="container">
+        <header class="hero">
+            <h1>Doğum Günü Paradoksu</h1>
+            <p class="subtitle">Sadece 23 kişinin bulunduğu bir odada, iki kişinin aynı doğum gününü paylaşma olasılığı %50'den fazladır. İnanması zor mu? Hadi kanıtlayalım!</p>
+        </header>
+
+        <div class="grid-layout">
+            <div class="left-col">
+                <section class="card form-card">
+                    <h2><i class="fa-solid fa-user-plus"></i> Deneye Katıl</h2>
+                    <form id="birthday-form">
+                        <div class="input-group">
+                            <label for="name">İsim (Opsiyonel)</label>
+                            <input type="text" id="name" placeholder="Adınız...">
+                        </div>
+                        <div class="input-group">
+                            <label for="birthday">Doğum Tarihiniz</label>
+                            <input type="date" id="birthday" required>
+                        </div>
+                        <button type="submit" class="submit-btn" id="submit-btn">
+                            Veriyi Gönder <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </section>
+
+                <section class="card matches-card">
+                    <h2><i class="fa-solid fa-users"></i> Canlı Çakışmalar</h2>
+                    <div id="matches-list" class="matches-container">
+                        <div class="loading-spinner"></div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="right-col">
+                <section class="stats-grid">
+                    <div class="stat-box">
+                        <i class="fa-solid fa-users-line stat-icon"></i>
+                        <h3>Toplam Katılımcı</h3>
+                        <p id="stat-total" class="stat-value">0</p>
+                    </div>
+                    <div class="stat-box highlight">
+                        <i class="fa-solid fa-percent stat-icon"></i>
+                        <h3>Teorik Olasılık</h3>
+                        <p id="stat-prob" class="stat-value">%0.0</p>
+                    </div>
+                    <div class="stat-box">
+                        <i class="fa-solid fa-handshake stat-icon"></i>
+                        <h3>Gerçek Eşleşme</h3>
+                        <p id="stat-collisions" class="stat-value">0</p>
+                    </div>
+                    <div class="stat-box">
+                        <i class="fa-solid fa-calendar-star stat-icon"></i>
+                        <h3>Popüler Gün</h3>
+                        <p id="stat-popular" class="stat-value">-</p>
+                    </div>
+                </section>
+
+                <section class="card chart-card">
+                    <h2>Büyüme Eğrisi</h2>
+                    <div style="position: relative; height: 300px; width: 100%;">
+                        <canvas id="probChart"></canvas>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <div class="theory-grid">
+            <section class="card theory-card math-card">
+                <h2><i class="fa-solid fa-square-root-variable"></i> Matematiksel Arka Plan</h2>
+                <p>Neden paradoks deniyor? Çünkü insan sezgisi olayları doğrusal (lineer) algılamaya eğilimlidir. Oysa odadaki kişi sayısı arttıkça, olası ikili eşleşmelerin sayısı kombinatoryal (n²) olarak artar.</p>
+                <div class="formula-box">
+                    $$P(n) = 1 - \frac{365!}{365^n (365-n)!}$$
+                </div>
+                <p>23 kişi kendi aralarında tam <strong>253 farklı ikili eşleşme</strong> yaratır ($$C(23,2) = 253$$). Bu geniş eşleşme havuzu, çakışmayı kaçınılmaz kılar.</p>
+            </section>
+
+            <section class="card theory-card cyber-card">
+                <h2><i class="fa-solid fa-shield-halved"></i> Siber Güvenlik ve "Birthday Attack"</h2>
+                <p>Bilişim dünyasında bu mantık <strong>Hash Çakışmaları (Collision)</strong> bulmak için kullanılır. Veritabanlarında rastgele UUID atanırken çökme riski buradan hesaplanır.</p>
+                <ul>
+                    <li><strong>Kriptografi:</strong> Bir saldırganın şifreyi kırmak için tüm ihtimalleri denemesine gerek yoktur.</li>
+                    <li>$$\sqrt{2^n}$$ deneme ile eşleşme yakalanabilir.</li>
+                    <li>Örneğin 128-bitlik bir MD5 algoritması, bu paradoks yüzünden sadece 64-bitlik bir güvenlik sunar.</li>
+                </ul>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <p>Tekirdağ Namık Kemal Üniversitesi | Bilgisayar Mühendisliği | BMB206 Olasılık ve İstatistik Projesi | Sude Arslan</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
