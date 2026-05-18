@@ -1,25 +1,56 @@
 from flask import Flask, render_template, request, jsonify
 import sqlite3
+import psycopg2
 import math
 from datetime import datetime
 import re
+import os
 
 app = Flask(__name__)
 DB_NAME = "database.db"
 
+# Render ortamındaki PostgreSQL URL'ini alır. 
+# Bilgisayarındaysan URL olmadığı için SQLite kullanmaya devam eder.
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+def get_db_connection():
+    if DATABASE_URL:
+        # Render PostgreSQL bağlantısı
+        conn = psycopg2.connect(DATABASE_URL)
+        return conn, 'postgres'
+    else:
+        # Yerel SQLite bağlantısı
+        conn = sqlite3.connect(DB_NAME)
+        return conn, 'sqlite'
+
 # --- VERİTABANI KURULUMU ---
 def init_db():
-    conn = sqlite3.connect(DB_NAME)
+    conn, db_type = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS participants (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            birthday TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            ip_address TEXT
-        )
-    ''')
+    
+    if db_type == 'postgres':
+        # PostgreSQL için tablo oluşturma (SERIAL kullanılır)
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS participants (
+                id SERIAL PRIMARY KEY,
+                name TEXT,
+                birthday TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                ip_address TEXT
+            )
+        ''')
+    else:
+        # SQLite için tablo oluşturma (AUTOINCREMENT kullanılır)
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS participants (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT,
+                birthday TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                ip_address TEXT
+            )
+        ''')
+        
     conn.commit()
     conn.close()
 
@@ -41,7 +72,7 @@ def index():
 
 @app.route('/api/stats', methods=['GET'])
 def get_stats():
-    conn = sqlite3.connect(DB_NAME)
+    conn, db_type = get_db_connection()
     cursor = conn.cursor()
     
     # Toplam Katılımcı
@@ -51,14 +82,24 @@ def get_stats():
     # Olasılık Hesabı
     theoretical_prob = calculate_theoretical_prob(total_participants)
     
-    # Çakışmaları Bulma (Aynı gün doğanlar)
-    cursor.execute('''
-        SELECT birthday, GROUP_CONCAT(name, ', ') as names, COUNT(*) as count 
-        FROM participants 
-        GROUP BY birthday 
-        HAVING count > 1 
-        ORDER BY count DESC, birthday ASC
-    ''')
+    # Çakışmaları Bulma (Veri tabanı lehçesine göre farklı SQL)
+    if db_type == 'postgres':
+        cursor.execute('''
+            SELECT birthday, STRING_AGG(name, ', ') as names, COUNT(*) as count 
+            FROM participants 
+            GROUP BY birthday 
+            HAVING COUNT(*) > 1 
+            ORDER BY count DESC, birthday ASC
+        ''')
+    else:
+        cursor.execute('''
+            SELECT birthday, GROUP_CONCAT(name, ', ') as names, COUNT(*) as count 
+            FROM participants 
+            GROUP BY birthday 
+            HAVING count > 1 
+            ORDER BY count DESC, birthday ASC
+        ''')
+        
     collisions = cursor.fetchall()
     
     # Toplam Gerçek Eşleşme Sayısı
@@ -67,7 +108,7 @@ def get_stats():
     # En Popüler Gün
     most_popular = collisions[0][0] if collisions else "-"
     
-    # Tüm Günlerin Dağılımı (Grafik için)
+    # Tüm Günlerin Dağılımı
     cursor.execute('SELECT birthday, COUNT(*) FROM participants GROUP BY birthday')
     distribution = cursor.fetchall()
 
@@ -85,7 +126,7 @@ def get_stats():
 @app.route('/api/participants', methods=['POST'])
 def add_participant():
     data = request.json
-    name = data.get('name', 'Anonim').strip()[:50] # XSS & Uzunluk Koruması
+    name = data.get('name', 'Anonim').strip()[:50] 
     birthday = data.get('birthday')
     ip_address = request.remote_addr
 
@@ -96,28 +137,41 @@ def add_participant():
     if name == "":
         name = "Anonim"
 
-    # Sadece Gün ve Ay kısmını alıyoruz (Yılı yok sayıyoruz)
+    # Sadece Gün ve Ay kısmını alıyoruz
     date_obj = datetime.strptime(birthday, '%Y-%m-%d')
     bday_formatted = date_obj.strftime('%d-%m')
 
-    # Rate Limiting & Anti-Spam (Aynı IP'den son 1 saatte 5'ten fazla kayıt engellenir)
-    conn = sqlite3.connect(DB_NAME)
+    conn, db_type = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('''
-        SELECT COUNT(*) FROM participants 
-        WHERE ip_address = ? AND created_at >= datetime('now', '-1 hour')
-    ''', (ip_address,))
     
-    if cursor.fetchone()[0] >= 5:
+    # Rate Limiting & Anti-Spam (Sunum için limit 500 yapıldı!)
+    if db_type == 'postgres':
+        cursor.execute('''
+            SELECT COUNT(*) FROM participants 
+            WHERE ip_address = %s AND created_at >= NOW() - INTERVAL '1 hour'
+        ''', (ip_address,))
+    else:
+        cursor.execute('''
+            SELECT COUNT(*) FROM participants 
+            WHERE ip_address = ? AND created_at >= datetime('now', '-1 hour')
+        ''', (ip_address,))
+        
+    if cursor.fetchone()[0] >= 500:
         conn.close()
         return jsonify({"error": "Çok fazla istek gönderdiniz. Lütfen bekleyin."}), 429
 
-    # Veritabanına Güvenli Kayıt (SQL Injection Korumalı Parametrik Sorgu)
+    # Veritabanına Güvenli Kayıt
     try:
-        cursor.execute('''
-            INSERT INTO participants (name, birthday, ip_address) 
-            VALUES (?, ?, ?)
-        ''', (name, bday_formatted, ip_address))
+        if db_type == 'postgres':
+            cursor.execute('''
+                INSERT INTO participants (name, birthday, ip_address) 
+                VALUES (%s, %s, %s)
+            ''', (name, bday_formatted, ip_address))
+        else:
+            cursor.execute('''
+                INSERT INTO participants (name, birthday, ip_address) 
+                VALUES (?, ?, ?)
+            ''', (name, bday_formatted, ip_address))
         conn.commit()
     except Exception as e:
         conn.close()
@@ -127,5 +181,4 @@ def add_participant():
     return jsonify({"success": True, "message": "Doğum günü başarıyla eklendi!"}), 201
 
 if __name__ == '__main__':
-    # Canlı ortam (Render vb.) host='0.0.0.0' gerektirir.
     app.run(debug=True, host='0.0.0.0', port=5000 , ssl_context='adhoc')
